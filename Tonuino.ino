@@ -814,47 +814,6 @@ void adminMenu(bool fromCard = false) {
     if (mySettings.adminMenuLocked == 1) {
       return;
     }
-    // Pin check
-    else if (mySettings.adminMenuLocked == 2) {
-      uint8_t pin[4];
-      mp3.playMp3FolderTrack(991);
-      if (askCode(pin) == true) {
-        if (checkTwo(pin, mySettings.adminMenuPin) == false) {
-          return;
-        }
-      } else {
-        return;
-      }
-    }
-    // Match check
-    else if (mySettings.adminMenuLocked == 3) {
-      uint8_t a = random(10, 20);
-      uint8_t b = random(1, 10);
-      uint8_t c;
-      mp3.playMp3FolderTrack(992);
-      waitForTrackToFinish();
-      mp3.playMp3FolderTrack(a);
-
-      if (random(1, 3) == 2) {
-        // a + b
-        c = a + b;
-        waitForTrackToFinish();
-        mp3.playMp3FolderTrack(993);
-      } else {
-        // a - b
-        b = random(1, a);
-        c = a - b;
-        waitForTrackToFinish();
-        mp3.playMp3FolderTrack(994);
-      }
-      waitForTrackToFinish();
-      mp3.playMp3FolderTrack(b);
-      Serial.println(c);
-      uint8_t temp = voiceMenu(255, 0, 0, false);
-      if (temp != c) {
-        return;
-      }
-    }
   }
   int subMenu = voiceMenu(12, 900, 900, false, false, 0, true);
   if (subMenu == 0)
@@ -960,44 +919,17 @@ void adminMenu(bool fromCard = false) {
   }
   // lock admin menu
   else if (subMenu == 12) {
-    int temp = voiceMenu(4, 980, 980, false);
+    // TODOMK: 4=>2 Optionen korrekt (AdminMenu mit PIN/Matheaufgabe entfernt)
+    int temp = voiceMenu(2, 980, 980, false);
     if (temp == 1) {
       mySettings.adminMenuLocked = 0;
     }
     else if (temp == 2) {
       mySettings.adminMenuLocked = 1;
     }
-    else if (temp == 3) {
-      int8_t pin[4];
-      mp3.playMp3FolderTrack(991);
-      if (askCode(pin)) {
-        memcpy(mySettings.adminMenuPin, pin, 4);
-        mySettings.adminMenuLocked = 2;
-      }
-    }
-    else if (temp == 4) {
-      mySettings.adminMenuLocked = 3;
-    }
-
   }
   writeSettingsToFlash();
   setstandbyTimer();
-}
-
-bool askCode(uint8_t *code) {
-  uint8_t x = 0;
-  while (x < 4) {
-    readButtons();
-    if (pauseButton.pressedFor(LONG_PRESS))
-      break;
-    if (pauseButton.wasReleased())
-      code[x++] = 1;
-    if (upButton.wasReleased())
-      code[x++] = 2;
-    if (downButton.wasReleased())
-      code[x++] = 3;
-  }
-  return true;
 }
 
 uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
