@@ -61,7 +61,6 @@ struct adminSettings {
   bool invertVolumeButtons;
   folderSettings shortCuts[4];
   uint8_t adminMenuLocked;
-  uint8_t adminMenuPin[4];
 };
 
 adminSettings mySettings;
@@ -162,10 +161,6 @@ void resetSettings() {
   mySettings.shortCuts[2].folder = 0;
   mySettings.shortCuts[3].folder = 0;
   mySettings.adminMenuLocked = 0;
-  mySettings.adminMenuPin[0] = 1;
-  mySettings.adminMenuPin[1] = 1;
-  mySettings.adminMenuPin[2] = 1;
-  mySettings.adminMenuPin[3] = 1;
 
   writeSettingsToFlash();
 }
@@ -176,10 +171,6 @@ void migrateSettings(int oldVersion) {
     Serial.println(F("1 -> 2"));
     mySettings.version = 2;
     mySettings.adminMenuLocked = 0;
-    mySettings.adminMenuPin[0] = 1;
-    mySettings.adminMenuPin[1] = 1;
-    mySettings.adminMenuPin[2] = 1;
-    mySettings.adminMenuPin[3] = 1;
     writeSettingsToFlash();
   }
 }
@@ -218,12 +209,6 @@ void loadSettingsFromFlash() {
 
   Serial.print(F("Admin Menu locked: "));
   Serial.println(mySettings.adminMenuLocked);
-
-  Serial.print(F("Admin Menu Pin: "));
-  Serial.print(mySettings.adminMenuPin[0]);
-  Serial.print(mySettings.adminMenuPin[1]);
-  Serial.print(mySettings.adminMenuPin[2]);
-  Serial.println(mySettings.adminMenuPin[3]);
 }
 
 // Leider kann das Modul selbst keine Queue abspielen, daher müssen wir selbst die Queue verwalten
