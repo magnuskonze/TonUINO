@@ -11,7 +11,7 @@
   |_   _|___ ___|  |  |     |   | |     |
     | | | . |   |  |  |-   -| | | |  |  |
     |_| |___|_|_|_____|_____|_|___|_____|
-    TonUINO Version 2.1
+    TonUINO Version 2.1.magnuskonze.1-SNAPSHOT
 
     created by Thorsten Voß and licensed under GNU/GPL.
     Information and contribution at https://tonuino.de.
@@ -226,294 +226,9 @@ void loadSettingsFromFlash() {
   Serial.println(mySettings.adminMenuPin[3]);
 }
 
-class Modifier {
-  public:
-    virtual void loop() {}
-    virtual bool handlePause() {
-      return false;
-    }
-    virtual bool handleNext() {
-      return false;
-    }
-    virtual bool handlePrevious() {
-      return false;
-    }
-    virtual bool handleNextButton() {
-      return false;
-    }
-    virtual bool handlePreviousButton() {
-      return false;
-    }
-    virtual bool handleVolumeUp() {
-      return false;
-    }
-    virtual bool handleVolumeDown() {
-      return false;
-    }
-    virtual bool handleRFID(nfcTagObject *newCard) {
-      return false;
-    }
-    virtual uint8_t getActive() {
-      return 0;
-    }
-    Modifier() {
-
-    }
-};
-
-Modifier *activeModifier = NULL;
-
-class SleepTimer: public Modifier {
-  private:
-    unsigned long sleepAtMillis = 0;
-
-  public:
-    void loop() {
-      if (this->sleepAtMillis != 0 && millis() > this->sleepAtMillis) {
-        Serial.println(F("=== SleepTimer::loop() -> SLEEP!"));
-        mp3.pause();
-        setstandbyTimer();
-        activeModifier = NULL;
-        delete this;
-      }
-    }
-
-    SleepTimer(uint8_t minutes) {
-      Serial.println(F("=== SleepTimer()"));
-      Serial.println(minutes);
-      this->sleepAtMillis = millis() + minutes * 60000;
-      //      if (isPlaying())
-      //        mp3.playAdvertisement(302);
-      //      delay(500);
-    }
-    uint8_t getActive() {
-      Serial.println(F("== SleepTimer::getActive()"));
-      return 1;
-    }
-};
-
-class FreezeDance: public Modifier {
-  private:
-    unsigned long nextStopAtMillis = 0;
-    const uint8_t minSecondsBetweenStops = 5;
-    const uint8_t maxSecondsBetweenStops = 30;
-
-    void setNextStopAtMillis() {
-      uint16_t seconds = random(this->minSecondsBetweenStops, this->maxSecondsBetweenStops + 1);
-      Serial.println(F("=== FreezeDance::setNextStopAtMillis()"));
-      Serial.println(seconds);
-      this->nextStopAtMillis = millis() + seconds * 1000;
-    }
-
-  public:
-    void loop() {
-      if (this->nextStopAtMillis != 0 && millis() > this->nextStopAtMillis) {
-        Serial.println(F("== FreezeDance::loop() -> FREEZE!"));
-        if (isPlaying()) {
-          mp3.playAdvertisement(301);
-          delay(500);
-        }
-        setNextStopAtMillis();
-      }
-    }
-    FreezeDance(void) {
-      Serial.println(F("=== FreezeDance()"));
-      if (isPlaying()) {
-        delay(1000);
-        mp3.playAdvertisement(300);
-        delay(500);
-      }
-      setNextStopAtMillis();
-    }
-    uint8_t getActive() {
-      Serial.println(F("== FreezeDance::getActive()"));
-      return 2;
-    }
-};
-
-class Locked: public Modifier {
-  public:
-    virtual bool handlePause()     {
-      Serial.println(F("== Locked::handlePause() -> LOCKED!"));
-      return true;
-    }
-    virtual bool handleNextButton()       {
-      Serial.println(F("== Locked::handleNextButton() -> LOCKED!"));
-      return true;
-    }
-    virtual bool handlePreviousButton() {
-      Serial.println(F("== Locked::handlePreviousButton() -> LOCKED!"));
-      return true;
-    }
-    virtual bool handleVolumeUp()   {
-      Serial.println(F("== Locked::handleVolumeUp() -> LOCKED!"));
-      return true;
-    }
-    virtual bool handleVolumeDown() {
-      Serial.println(F("== Locked::handleVolumeDown() -> LOCKED!"));
-      return true;
-    }
-    virtual bool handleRFID(nfcTagObject *newCard) {
-      Serial.println(F("== Locked::handleRFID() -> LOCKED!"));
-      return true;
-    }
-    Locked(void) {
-      Serial.println(F("=== Locked()"));
-      //      if (isPlaying())
-      //        mp3.playAdvertisement(303);
-    }
-    uint8_t getActive() {
-      return 3;
-    }
-};
-
-class ToddlerMode: public Modifier {
-  public:
-    virtual bool handlePause()     {
-      Serial.println(F("== ToddlerMode::handlePause() -> LOCKED!"));
-      return true;
-    }
-    virtual bool handleNextButton()       {
-      Serial.println(F("== ToddlerMode::handleNextButton() -> LOCKED!"));
-      return true;
-    }
-    virtual bool handlePreviousButton() {
-      Serial.println(F("== ToddlerMode::handlePreviousButton() -> LOCKED!"));
-      return true;
-    }
-    virtual bool handleVolumeUp()   {
-      Serial.println(F("== ToddlerMode::handleVolumeUp() -> LOCKED!"));
-      return true;
-    }
-    virtual bool handleVolumeDown() {
-      Serial.println(F("== ToddlerMode::handleVolumeDown() -> LOCKED!"));
-      return true;
-    }
-    ToddlerMode(void) {
-      Serial.println(F("=== ToddlerMode()"));
-      //      if (isPlaying())
-      //        mp3.playAdvertisement(304);
-    }
-    uint8_t getActive() {
-      Serial.println(F("== ToddlerMode::getActive()"));
-      return 4;
-    }
-};
-
-class KindergardenMode: public Modifier {
-  private:
-    nfcTagObject nextCard;
-    bool cardQueued = false;
-
-  public:
-    virtual bool handleNext() {
-      Serial.println(F("== KindergardenMode::handleNext() -> NEXT"));
-      //if (this->nextCard.cookie == cardCookie && this->nextCard.nfcFolderSettings.folder != 0 && this->nextCard.nfcFolderSettings.mode != 0) {
-      //myFolder = &this->nextCard.nfcFolderSettings;
-      if (this->cardQueued == true) {
-        this->cardQueued = false;
-
-        myCard = nextCard;
-        myFolder = &myCard.nfcFolderSettings;
-        Serial.println(myFolder->folder);
-        Serial.println(myFolder->mode);
-        playFolder();
-        return true;
-      }
-      return false;
-    }
-    //    virtual bool handlePause()     {
-    //      Serial.println(F("== KindergardenMode::handlePause() -> LOCKED!"));
-    //      return true;
-    //    }
-    virtual bool handleNextButton()       {
-      Serial.println(F("== KindergardenMode::handleNextButton() -> LOCKED!"));
-      return true;
-    }
-    virtual bool handlePreviousButton() {
-      Serial.println(F("== KindergardenMode::handlePreviousButton() -> LOCKED!"));
-      return true;
-    }
-    virtual bool handleRFID(nfcTagObject * newCard) { // lot of work to do!
-      Serial.println(F("== KindergardenMode::handleRFID() -> queued!"));
-      this->nextCard = *newCard;
-      this->cardQueued = true;
-      if (!isPlaying()) {
-        handleNext();
-      }
-      return true;
-    }
-    KindergardenMode() {
-      Serial.println(F("=== KindergardenMode()"));
-      //      if (isPlaying())
-      //        mp3.playAdvertisement(305);
-      //      delay(500);
-    }
-    uint8_t getActive() {
-      Serial.println(F("== KindergardenMode::getActive()"));
-      return 5;
-    }
-};
-
-class RepeatSingleModifier: public Modifier {
-  public:
-    virtual bool handleNext() {
-      Serial.println(F("== RepeatSingleModifier::handleNext() -> REPEAT CURRENT TRACK"));
-      delay(50);
-      if (isPlaying()) return true;
-      mp3.playFolderTrack(myFolder->folder, currentTrack);
-      _lastTrackFinished = 0;
-      return true;
-    }
-    RepeatSingleModifier() {
-      Serial.println(F("=== RepeatSingleModifier()"));
-    }
-    uint8_t getActive() {
-      Serial.println(F("== RepeatSingleModifier::getActive()"));
-      return 6;
-    }
-};
-
-// An modifier can also do somethings in addition to the modified action
-// by returning false (not handled) at the end
-// This simple FeedbackModifier will tell the volume before changing it and
-// give some feedback once a RFID card is detected.
-class FeedbackModifier: public Modifier {
-  public:
-    virtual bool handleVolumeDown() {
-      if (volume > mySettings.minVolume) {
-        mp3.playAdvertisement(volume - 1);
-      }
-      else {
-        mp3.playAdvertisement(volume);
-      }
-      delay(500);
-      Serial.println(F("== FeedbackModifier::handleVolumeDown()!"));
-      return false;
-    }
-    virtual bool handleVolumeUp() {
-      if (volume < mySettings.maxVolume) {
-        mp3.playAdvertisement(volume + 1);
-      }
-      else {
-        mp3.playAdvertisement(volume);
-      }
-      delay(500);
-      Serial.println(F("== FeedbackModifier::handleVolumeUp()!"));
-      return false;
-    }
-    virtual bool handleRFID(nfcTagObject *newCard) {
-      Serial.println(F("== FeedbackModifier::handleRFID()"));
-      return false;
-    }
-};
-
 // Leider kann das Modul selbst keine Queue abspielen, daher müssen wir selbst die Queue verwalten
 static void nextTrack(uint16_t track) {
   Serial.println(track);
-  if (activeModifier != NULL)
-    if (activeModifier->handleNext() == true)
-      return;
 
   if (track == _lastTrackFinished) {
     return;
@@ -753,6 +468,8 @@ void setup() {
   delay(2000);
   volume = mySettings.initVolume;
   mp3.setVolume(volume);
+  // TODOMK: Warnungen beheben: EQ-Modi in Array hinterlegen
+  // mp3.setEq(DfMp3_Eq_Normal);
   mp3.setEq(mySettings.eq - 1);
   // Fix für das Problem mit dem Timeout (ist jetzt in Upstream daher nicht mehr nötig!)
   //mySoftwareSerial.setTimeout(10000);
@@ -803,10 +520,6 @@ void readButtons() {
 }
 
 void volumeUpButton() {
-  if (activeModifier != NULL)
-    if (activeModifier->handleVolumeUp() == true)
-      return;
-
   Serial.println(F("=== volumeUp()"));
   if (volume < mySettings.maxVolume) {
     mp3.increaseVolume();
@@ -816,9 +529,6 @@ void volumeUpButton() {
 }
 
 void volumeDownButton() {
-  if (activeModifier != NULL)
-    if (activeModifier->handleVolumeDown() == true)
-      return;
 
   Serial.println(F("=== volumeDown()"));
   if (volume > mySettings.minVolume) {
@@ -829,18 +539,11 @@ void volumeDownButton() {
 }
 
 void nextButton() {
-  if (activeModifier != NULL)
-    if (activeModifier->handleNextButton() == true)
-      return;
-
   nextTrack(random(65536));
   delay(1000);
 }
 
 void previousButton() {
-  if (activeModifier != NULL)
-    if (activeModifier->handlePreviousButton() == true)
-      return;
 
   previousTrack();
   delay(1000);
@@ -948,11 +651,6 @@ void loop() {
     checkStandbyAtMillis();
     mp3.loop();
 
-    // Modifier : WIP!
-    if (activeModifier != NULL) {
-      activeModifier->loop();
-    }
-
     // Buttons werden nun über JS_Button gehandelt, dadurch kann jede Taste
     // doppelt belegt werden
     readButtons();
@@ -969,9 +667,6 @@ void loop() {
     }
 
     if (pauseButton.wasReleased()) {
-      if (activeModifier != NULL)
-        if (activeModifier->handlePause() == true)
-          return;
       if (ignorePauseButton == false)
         if (isPlaying()) {
           mp3.pause();
@@ -984,9 +679,6 @@ void loop() {
       ignorePauseButton = false;
     } else if (pauseButton.pressedFor(LONG_PRESS) &&
                ignorePauseButton == false) {
-      if (activeModifier != NULL)
-        if (activeModifier->handlePause() == true)
-          return;
       if (isPlaying()) {
         uint8_t advertTrack;
         if (myFolder->mode == 3 || myFolder->mode == 9) {
@@ -1191,43 +883,8 @@ void adminMenu(bool fromCard = false) {
   }
   else if (subMenu == 6) {
     // create modifier card
-    nfcTagObject tempCard;
-    tempCard.cookie = cardCookie;
-    tempCard.version = 1;
-    tempCard.nfcFolderSettings.folder = 0;
-    tempCard.nfcFolderSettings.special = 0;
-    tempCard.nfcFolderSettings.special2 = 0;
-    tempCard.nfcFolderSettings.mode = voiceMenu(6, 970, 970, false, false, 0, true);
-
-    if (tempCard.nfcFolderSettings.mode != 0) {
-      if (tempCard.nfcFolderSettings.mode == 1) {
-        switch (voiceMenu(4, 960, 960)) {
-          case 1: tempCard.nfcFolderSettings.special = 5; break;
-          case 2: tempCard.nfcFolderSettings.special = 15; break;
-          case 3: tempCard.nfcFolderSettings.special = 30; break;
-          case 4: tempCard.nfcFolderSettings.special = 60; break;
-        }
-      }
-      mp3.playMp3FolderTrack(800);
-      do {
-        readButtons();
-        if (upButton.wasReleased() || downButton.wasReleased()) {
-          Serial.println(F("Abgebrochen!"));
-          mp3.playMp3FolderTrack(802);
-          return;
-        }
-      } while (!mfrc522.PICC_IsNewCardPresent());
-
-      // RFID Karte wurde aufgelegt
-      if (mfrc522.PICC_ReadCardSerial()) {
-        Serial.println(F("schreibe Karte..."));
-        writeCard(tempCard);
-        delay(100);
-        mfrc522.PICC_HaltA();
-        mfrc522.PCD_StopCrypto1();
-        waitForTrackToFinish();
-      }
-    }
+    // TODO_MK: "Abbrechen"-Ausgabe oder Menü sauber ausbauen
+    mp3.playMp3FolderTrack(800);
   }
   else if (subMenu == 7) {
     uint8_t shortcut = voiceMenu(4, 940, 940);
@@ -1626,54 +1283,20 @@ bool readCard(nfcTagObject * nfcTag) {
 
   if (tempCard.cookie == cardCookie) {
 
-    if (activeModifier != NULL && tempCard.nfcFolderSettings.folder != 0) {
-      if (activeModifier->handleRFID(&tempCard) == true) {
-        return false;
-      }
-    }
-
     if (tempCard.nfcFolderSettings.folder == 0) {
-      if (activeModifier != NULL) {
-        if (activeModifier->getActive() == tempCard.nfcFolderSettings.mode) {
-          activeModifier = NULL;
-          Serial.println(F("modifier removed"));
-          if (isPlaying()) {
-            mp3.playAdvertisement(261);
-          }
-          else {
-            mp3.start();
-            delay(100);
-            mp3.playAdvertisement(261);
-            delay(100);
-            mp3.pause();
-          }
-          delay(2000);
-          return false;
-        }
-      }
-      if (tempCard.nfcFolderSettings.mode != 0 && tempCard.nfcFolderSettings.mode != 255) {
-        if (isPlaying()) {
-          mp3.playAdvertisement(260);
-        }
-        else {
-          mp3.start();
-          delay(100);
-          mp3.playAdvertisement(260);
-          delay(100);
-          mp3.pause();
-        }
-      }
+      // TODOMK: kann das ganze switch weg?
       switch (tempCard.nfcFolderSettings.mode ) {
         case 0:
         case 255:
           mfrc522.PICC_HaltA(); mfrc522.PCD_StopCrypto1(); adminMenu(true);  break;
+        /*
         case 1: activeModifier = new SleepTimer(tempCard.nfcFolderSettings.special); break;
         case 2: activeModifier = new FreezeDance(); break;
         case 3: activeModifier = new Locked(); break;
         case 4: activeModifier = new ToddlerMode(); break;
         case 5: activeModifier = new KindergardenMode(); break;
         case 6: activeModifier = new RepeatSingleModifier(); break;
-
+        */
       }
       delay(2000);
       return false;
