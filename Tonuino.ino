@@ -59,7 +59,6 @@ struct adminSettings {
   bool locked;
   long standbyTimer;
   bool invertVolumeButtons;
-  folderSettings shortCuts[4];
   uint8_t adminMenuLocked;
 };
 
@@ -156,10 +155,6 @@ void resetSettings() {
   mySettings.locked = false;
   mySettings.standbyTimer = 0;
   mySettings.invertVolumeButtons = true;
-  mySettings.shortCuts[0].folder = 0;
-  mySettings.shortCuts[1].folder = 0;
-  mySettings.shortCuts[2].folder = 0;
-  mySettings.shortCuts[3].folder = 0;
   mySettings.adminMenuLocked = 0;
 
   writeSettingsToFlash();
@@ -489,9 +484,7 @@ void setup() {
     loadSettingsFromFlash();
   }
 
-
-  // Start Shortcut "at Startup" - e.g. Welcome Sound
-  playShortCut(3);
+  // TODOMK Start Shortcut "at Startup" - e.g. Welcome Sound
 }
 
 void readButtons() {
@@ -618,19 +611,6 @@ void playFolder() {
   }
 }
 
-void playShortCut(uint8_t shortCut) {
-  Serial.println(F("=== playShortCut()"));
-  Serial.println(shortCut);
-  if (mySettings.shortCuts[shortCut].folder != 0) {
-    myFolder = &mySettings.shortCuts[shortCut];
-    playFolder();
-    disablestandbyTimer();
-    delay(1000);
-  }
-  else
-    Serial.println(F("Shortcut not configured!"));
-}
-
 void loop() {
   do {
     checkStandbyAtMillis();
@@ -678,9 +658,6 @@ void loop() {
         }
         mp3.playAdvertisement(advertTrack);
       }
-      else {
-        playShortCut(0);
-      }
       ignorePauseButton = true;
     }
 
@@ -693,9 +670,6 @@ void loop() {
         else {
           nextButton();
         }
-      }
-      else {
-        playShortCut(1);
       }
       ignoreUpButton = true;
 #endif
@@ -720,9 +694,6 @@ void loop() {
           previousButton();
         }
       }
-      else {
-        playShortCut(2);
-      }
       ignoreDownButton = true;
 #endif
     } else if (downButton.wasReleased()) {
@@ -746,9 +717,6 @@ void loop() {
           nextButton();
         }
       }
-      else {
-        playShortCut(1);
-      }
     }
     if (buttonFive.wasReleased()) {
       if (isPlaying()) {
@@ -758,9 +726,6 @@ void loop() {
         else {
           previousButton();
         }
-      }
-      else {
-        playShortCut(2);
       }
     }
 #endif
@@ -831,9 +796,7 @@ void adminMenu(bool fromCard = false) {
     mp3.playMp3FolderTrack(800);
   }
   else if (subMenu == 7) {
-    uint8_t shortcut = voiceMenu(4, 940, 940);
-    setupFolder(&mySettings.shortCuts[shortcut - 1]);
-    mp3.playMp3FolderTrack(400);
+    // TODOMK: sauber ausbauen
   }
   else if (subMenu == 8) {
     switch (voiceMenu(5, 960, 960)) {
