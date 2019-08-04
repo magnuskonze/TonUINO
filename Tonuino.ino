@@ -162,7 +162,7 @@ void resetSettings() {
 
 void migrateSettings(int oldVersion) {
   if (oldVersion == 1) {
-    Serial.println(F("=== resetSettings()"));
+    Serial.println(F("=== migrateSettings()"));
     Serial.println(F("1 -> 2"));
     mySettings.version = 2;
     mySettings.adminMenuLocked = 0;
