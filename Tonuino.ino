@@ -17,9 +17,6 @@
     Information and contribution at https://tonuino.de.
 */
 
-// uncomment the below line to enable five button support
-//#define FIVEBUTTONS
-
 static const uint32_t cardCookie = 322417479;
 
 // DFPlayer Mini
@@ -68,7 +65,6 @@ static void nextTrack(uint16_t track);
 uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
                   bool preview = false, int previewFromFolder = 0, int defaultValue = 0, bool exitWithLongPress = false);
 bool isPlaying();
-bool checkTwo ( uint8_t a[], uint8_t b[] );
 void writeCard(nfcTagObject nfcTag);
 void dump_byte_array(byte * buffer, byte bufferSize);
 void adminMenu(bool fromCard = false);
@@ -337,27 +333,15 @@ uint8_t lastvolume = 99;
 #define shutdownPin 7
 #define openAnalogPin A7
 
-#ifdef FIVEBUTTONS
-#define buttonFourPin A3
-#define buttonFivePin A4
-#endif
-
 #define LONG_PRESS 1000
 
 Button pauseButton(buttonPause);
 Button upButton(buttonUp);
 Button downButton(buttonDown);
-#ifdef FIVEBUTTONS
-Button buttonFour(buttonFourPin);
-Button buttonFive(buttonFivePin);
-#endif
+
 bool ignorePauseButton = false;
 bool ignoreUpButton = false;
 bool ignoreDownButton = false;
-#ifdef FIVEBUTTONS
-bool ignoreButtonFour = false;
-bool ignoreButtonFive = false;
-#endif
 
 /// Funktionen für den Standby Timer (z.B. über Pololu-Switch oder Mosfet)
 
@@ -428,7 +412,7 @@ void setup() {
   Serial.println(F("|_   _|___ ___|  |  |     |   | |     |"));
   Serial.println(F("  | | | . |   |  |  |-   -| | | |  |  |"));
   Serial.println(F("  |_| |___|_|_|_____|_____|_|___|_____|\n"));
-  Serial.println(F("TonUINO Version 2.1"));
+  Serial.println(F("TonUINO Version 2.1.mk.1"));
   Serial.println(F("created by Thorsten Voß and licensed under GNU/GPL."));
   Serial.println(F("Information and contribution at https://tonuino.de.\n"));
   Serial.println(F("Magnus Metal Box\n"));
@@ -466,10 +450,6 @@ void setup() {
   pinMode(buttonPause, INPUT_PULLUP);
   pinMode(buttonUp, INPUT_PULLUP);
   pinMode(buttonDown, INPUT_PULLUP);
-#ifdef FIVEBUTTONS
-  pinMode(buttonFourPin, INPUT_PULLUP);
-  pinMode(buttonFivePin, INPUT_PULLUP);
-#endif
   pinMode(shutdownPin, OUTPUT);
   digitalWrite(shutdownPin, LOW);
 
@@ -491,10 +471,6 @@ void readButtons() {
   pauseButton.read();
   upButton.read();
   downButton.read();
-#ifdef FIVEBUTTONS
-  buttonFour.read();
-  buttonFive.read();
-#endif
 }
 
 void volumeUpButton() {
@@ -673,7 +649,6 @@ void loop() {
     }
 
     if (upButton.pressedFor(LONG_PRESS)) {
-#ifndef FIVEBUTTONS
       if (isPlaying()) {
         if (!mySettings.invertVolumeButtons) {
           volumeUpButton();
@@ -683,7 +658,6 @@ void loop() {
         }
       }
       ignoreUpButton = true;
-#endif
     } else if (upButton.wasReleased()) {
       if (!ignoreUpButton)
         if (!mySettings.invertVolumeButtons) {
@@ -696,7 +670,6 @@ void loop() {
     }
 
     if (downButton.pressedFor(LONG_PRESS)) {
-#ifndef FIVEBUTTONS
       if (isPlaying()) {
         if (!mySettings.invertVolumeButtons) {
           volumeDownButton();
@@ -706,7 +679,6 @@ void loop() {
         }
       }
       ignoreDownButton = true;
-#endif
     } else if (downButton.wasReleased()) {
       if (!ignoreDownButton) {
         if (!mySettings.invertVolumeButtons) {
@@ -718,28 +690,6 @@ void loop() {
       }
       ignoreDownButton = false;
     }
-#ifdef FIVEBUTTONS
-    if (buttonFour.wasReleased()) {
-      if (isPlaying()) {
-        if (!mySettings.invertVolumeButtons) {
-          volumeUpButton();
-        }
-        else {
-          nextButton();
-        }
-      }
-    }
-    if (buttonFive.wasReleased()) {
-      if (isPlaying()) {
-        if (!mySettings.invertVolumeButtons) {
-          volumeDownButton();
-        }
-        else {
-          previousButton();
-        }
-      }
-    }
-#endif
     // Ende der Buttons
   } while (!mfrc522.PICC_IsNewCardPresent());
 
@@ -1299,12 +1249,3 @@ void dump_byte_array(byte * buffer, byte bufferSize) {
   }
 }
 
-///////////////////////////////////////// Check Bytes   ///////////////////////////////////
-bool checkTwo ( uint8_t a[], uint8_t b[] ) {
-  for ( uint8_t k = 0; k < 4; k++ ) {   // Loop 4 times
-    if ( a[k] != b[k] ) {     // IF a != b then false, because: one fails, all fail
-      return false;
-    }
-  }
-  return true;
-}
