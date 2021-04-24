@@ -422,7 +422,8 @@ void setup() {
   // Zwei Sekunden warten bis der DFPlayer Mini initialisiert ist
   delay(2000);
   volume = mySettings.initVolume;
-  mp3.setVolume(20);
+  // API siehe https://github.com/Makuna/DFMiniMp3/wiki/API-Reference
+  mp3.setVolume(30);
 
   // TODOMK: Warnungen beheben: EQ-Modi in Array hinterlegen
   // mp3.setEq(DfMp3_Eq_Normal);
@@ -475,7 +476,6 @@ void volumeUpButton() {
 }
 
 void volumeDownButton() {
-
   Serial.println(F("=== volumeDown()"));
   if (volume > mySettings.minVolume) {
     mp3.decreaseVolume();
@@ -490,7 +490,6 @@ void nextButton() {
 }
 
 void previousButton() {
-
   previousTrack();
   delay(1000);
 }
