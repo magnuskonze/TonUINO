@@ -580,7 +580,6 @@ void playFolder() {
 
 void loop() {
   do {
-	Serial.println(mp3.getVolume());
     checkStandbyAtMillis();
     mp3.loop();
 
@@ -914,8 +913,8 @@ bool setupFolder(folderSettings * theFolder) {
   if (theFolder->folder == 0) return false;
 
   // Wiedergabemodus abfragen
-  // FIXME: defaultwert muss vermutlich 1 sein, da der erste Modus entfernt wurde?!?
-  theFolder->mode = voiceMenu(5, 310, 311, false, 0, 0, true);
+  // Magnus, 24.04.21: +1 da die erste Option übersprungen wird (Offset wurde um 1 auf 311 erhöht, die Modu beim Abspielen wurden nicht angepasst)
+  theFolder->mode = voiceMenu(5, 310, 311, false, 0, 0, true)+1;
   if (theFolder->mode == 0) return false;
 
   //  // Hörbuchmodus -> Fortschritt im EEPROM auf 1 setzen
