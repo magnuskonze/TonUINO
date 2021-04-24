@@ -629,47 +629,12 @@ void loop() {
       ignorePauseButton = true;
     }
 
-    if (upButton.pressedFor(LONG_PRESS)) {
-      if (isPlaying()) {
-        if (!mySettings.invertVolumeButtons) {
-          volumeUpButton();
-        }
-        else {
-          nextButton();
-        }
-      }
-      ignoreUpButton = true;
-    } else if (upButton.wasReleased()) {
-      if (!ignoreUpButton)
-        if (!mySettings.invertVolumeButtons) {
-          nextButton();
-        }
-        else {
-          volumeUpButton();
-        }
-      ignoreUpButton = false;
+    if (upButton.wasReleased()) {
+      nextButton();
     }
 
-    if (downButton.pressedFor(LONG_PRESS)) {
-      if (isPlaying()) {
-        if (!mySettings.invertVolumeButtons) {
-          volumeDownButton();
-        }
-        else {
-          previousButton();
-        }
-      }
-      ignoreDownButton = true;
-    } else if (downButton.wasReleased()) {
-      if (!ignoreDownButton) {
-        if (!mySettings.invertVolumeButtons) {
-          previousButton();
-        }
-        else {
-          volumeDownButton();
-        }
-      }
-      ignoreDownButton = false;
+    if (downButton.wasReleased()) {
+      previousButton();
     }
     // Ende der Buttons
   } while (!mfrc522.PICC_IsNewCardPresent());
