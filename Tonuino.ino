@@ -215,12 +215,7 @@ static void nextTrack(uint16_t track) {
 
   Serial.println(F("=== nextTrack()"));
 
-  if (myFolder->mode == 1 || myFolder->mode == 7) {
-    Serial.println(F("Hörspielmodus ist aktiv -> keinen neuen Track spielen"));
-    setstandbyTimer();
-    //    mp3.sleep(); // Je nach Modul kommt es nicht mehr zurück aus dem Sleep!
-  }
-  if (myFolder->mode == 2 || myFolder->mode == 8) {
+  if (myFolder->mode == 2) {
     if (currentTrack != numTracksInFolder) {
       currentTrack = currentTrack + 1;
       mp3.playFolderTrack(myFolder->folder, currentTrack);
@@ -231,7 +226,7 @@ static void nextTrack(uint16_t track) {
       setstandbyTimer();
     { }
   }
-  if (myFolder->mode == 3 || myFolder->mode == 9) {
+  if (myFolder->mode == 3) {
     if (currentTrack != numTracksInFolder - firstTrack + 1) {
       Serial.print(F("Party -> weiter in der Queue "));
       currentTrack++;
@@ -272,18 +267,14 @@ static void nextTrack(uint16_t track) {
 
 static void previousTrack() {
   Serial.println(F("=== previousTrack()"));
-  /*  if (myCard.mode == 1 || myCard.mode == 7) {
-      Serial.println(F("Hörspielmodus ist aktiv -> Track von vorne spielen"));
-      mp3.playFolderTrack(myCard.folder, currentTrack);
-    }*/
-  if (myFolder->mode == 2 || myFolder->mode == 8) {
+  if (myFolder->mode == 2) {
     Serial.println(F("Albummodus ist aktiv -> vorheriger Track"));
     if (currentTrack != firstTrack) {
       currentTrack = currentTrack - 1;
     }
     mp3.playFolderTrack(myFolder->folder, currentTrack);
   }
-  if (myFolder->mode == 3 || myFolder->mode == 9) {
+  if (myFolder->mode == 3) {
     if (currentTrack != 1) {
       Serial.print(F("Party Modus ist aktiv -> zurück in der Qeueue "));
       currentTrack--;
@@ -431,7 +422,8 @@ void setup() {
   // Zwei Sekunden warten bis der DFPlayer Mini initialisiert ist
   delay(2000);
   volume = mySettings.initVolume;
-  mp3.setVolume(volume);
+  mp3.setVolume(20);
+
   // TODOMK: Warnungen beheben: EQ-Modi in Array hinterlegen
   // mp3.setEq(DfMp3_Eq_Normal);
   mp3.setEq(mySettings.eq - 1);
@@ -490,16 +482,6 @@ void volumeDownButton() {
     volume--;
   }
   Serial.println(volume);
-}
-
-void checkVolume() {
-  volume = map( analogRead(volumePoti), 0, 1023, 3, 25);
-  if( abs(volume-lastvolume) >1){
-    mp3.setVolume( volume );
-    lastvolume= volume;
-    Serial.print(F(" = Volume"));
-    Serial.println( volume );
-  }
 }
 
 void nextButton() {
@@ -599,13 +581,13 @@ void playFolder() {
 
 void loop() {
   do {
+	Serial.println(mp3.getVolume());
     checkStandbyAtMillis();
     mp3.loop();
 
     // Buttons werden nun über JS_Button gehandelt, dadurch kann jede Taste
     // doppelt belegt werden
     readButtons();
-    checkVolume();
 
     // admin menu
     if ((pauseButton.pressedFor(LONG_PRESS) || upButton.pressedFor(LONG_PRESS) || downButton.pressedFor(LONG_PRESS)) && pauseButton.isPressed() && upButton.isPressed() && downButton.isPressed()) {
@@ -968,7 +950,8 @@ bool setupFolder(folderSettings * theFolder) {
   if (theFolder->folder == 0) return false;
 
   // Wiedergabemodus abfragen
-  theFolder->mode = voiceMenu(9, 310, 310, false, 0, 0, true);
+  // FIXME: defaultwert muss vermutlich 1 sein, da der erste Modus entfernt wurde?!?
+  theFolder->mode = voiceMenu(5, 310, 311, false, 0, 0, true);
   if (theFolder->mode == 0) return false;
 
   //  // Hörbuchmodus -> Fortschritt im EEPROM auf 1 setzen
