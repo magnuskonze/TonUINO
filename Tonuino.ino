@@ -13,7 +13,7 @@
     |_| |___|_|_|_____|_____|_|___|_____|
     TonUINO Version 2.2 (Magnus Box)
 
-    created by Thorsten VoÃŸ and licensed under GNU/GPL.
+    created by Thorsten Voß and licensed under GNU/GPL.
     Information and contribution at https://tonuino.de.
 */
 
@@ -110,10 +110,10 @@ class Mp3Notify {
 static DFMiniMp3<SoftwareSerial, Mp3Notify> mp3(mySoftwareSerial);
 
 void shuffleQueue() {
-  // Queue fÃ¼r die Zufallswiedergabe erstellen
+  // Queue für die Zufallswiedergabe erstellen
   for (uint8_t x = 0; x < numTracksInFolder - firstTrack + 1; x++)
     queue[x] = x + firstTrack;
-  // Rest mit 0 auffÃ¼llen
+  // Rest mit 0 auffüllen
   for (uint8_t x = numTracksInFolder - firstTrack + 1; x < 255; x++)
     queue[x] = 0;
   // Queue mischen
@@ -198,8 +198,8 @@ void loadSettingsFromFlash() {
   Serial.println(mySettings.adminMenuLocked);
 }
 
-// Leider kann das Modul selbst keine Queue abspielen, daher mÃ¼ssen wir selbst die Queue verwalten
-// track: Hack, da der mp3 evtl. das FINISH-Event mehrfach feuert. kann man nicht currenttrack und lastTrack prÃ¼fen?
+// Leider kann das Modul selbst keine Queue abspielen, daher müssen wir selbst die Queue verwalten
+// track: Hack, da der mp3 evtl. das FINISH-Event mehrfach feuert. kann man nicht currenttrack und lastTrack prüfen?
 static void nextTrack(uint16_t track) {
   Serial.println(track);
 
@@ -219,10 +219,10 @@ static void nextTrack(uint16_t track) {
     if (currentTrack != numTracksInFolder) {
       currentTrack = currentTrack + 1;
       mp3.playFolderTrack(myFolder->folder, currentTrack);
-      Serial.print(F("Albummodus ist aktiv -> nÃ¤chster Track: "));
+      Serial.print(F("Albummodus ist aktiv -> nächster Track: "));
       Serial.print(currentTrack);
     } else
-      //      mp3.sleep();   // Je nach Modul kommt es nicht mehr zurÃ¼ck aus dem Sleep!
+      //      mp3.sleep();   // Je nach Modul kommt es nicht mehr zurück aus dem Sleep!
       setstandbyTimer();
     { }
   }
@@ -243,21 +243,21 @@ static void nextTrack(uint16_t track) {
 
   if (myFolder->mode == 4) {
     Serial.println(F("Einzel Modus aktiv -> Strom sparen"));
-    //    mp3.sleep();      // Je nach Modul kommt es nicht mehr zurÃ¼ck aus dem Sleep!
+    //    mp3.sleep();      // Je nach Modul kommt es nicht mehr zurück aus dem Sleep!
     setstandbyTimer();
   }
   if (myFolder->mode == 5) {
     if (currentTrack != numTracksInFolder) {
       currentTrack = currentTrack + 1;
-      Serial.print(F("HÃ¶rbuch Modus ist aktiv -> nÃ¤chster Track und "
+      Serial.print(F("Hörbuch Modus ist aktiv -> nächster Track und "
                      "Fortschritt speichern"));
       Serial.println(currentTrack);
       mp3.playFolderTrack(myFolder->folder, currentTrack);
       // Fortschritt im EEPROM abspeichern
       EEPROM.update(myFolder->folder, currentTrack);
     } else {
-      //      mp3.sleep();  // Je nach Modul kommt es nicht mehr zurÃ¼ck aus dem Sleep!
-      // Fortschritt zurÃ¼ck setzen
+      //      mp3.sleep();  // Je nach Modul kommt es nicht mehr zurück aus dem Sleep!
+      // Fortschritt zurück setzen
       EEPROM.update(myFolder->folder, 1);
       setstandbyTimer();
     }
@@ -276,7 +276,7 @@ static void previousTrack() {
   }
   if (myFolder->mode == 3) {
     if (currentTrack != 1) {
-      Serial.print(F("Party Modus ist aktiv -> zurÃ¼ck in der Qeueue "));
+      Serial.print(F("Party Modus ist aktiv -> zurück in der Qeueue "));
       currentTrack--;
     }
     else
@@ -292,7 +292,7 @@ static void previousTrack() {
     mp3.playFolderTrack(myFolder->folder, currentTrack);
   }
   if (myFolder->mode == 5) {
-    Serial.println(F("HÃ¶rbuch Modus ist aktiv -> vorheriger Track und "
+    Serial.println(F("Hörbuch Modus ist aktiv -> vorheriger Track und "
                      "Fortschritt speichern"));
     if (currentTrack != 1) {
       currentTrack = currentTrack - 1;
@@ -334,7 +334,7 @@ bool ignorePauseButton = false;
 bool ignoreUpButton = false;
 bool ignoreDownButton = false;
 
-/// Funktionen fÃ¼r den Standby Timer (z.B. Ã¼ber Pololu-Switch oder Mosfet)
+/// Funktionen für den Standby Timer (z.B. über Pololu-Switch oder Mosfet)
 
 void setstandbyTimer() {
   Serial.println(F("=== setstandbyTimer()"));
@@ -387,9 +387,9 @@ void waitForTrackToFinish() {
 
 void setup() {
 
-  Serial.begin(115200); // Es gibt ein paar Debug Ausgaben Ã¼ber die serielle Schnittstelle
+  Serial.begin(115200); // Es gibt ein paar Debug Ausgaben über die serielle Schnittstelle
    
-  // Wert fÃ¼r randomSeed() erzeugen durch das mehrfache Sammeln von rauschenden LSBs eines offenen Analogeingangs
+  // Wert für randomSeed() erzeugen durch das mehrfache Sammeln von rauschenden LSBs eines offenen Analogeingangs
   uint32_t ADC_LSB;
   uint32_t ADCSeed;
   for(uint8_t i = 0; i < 128; i++) {
@@ -404,7 +404,7 @@ void setup() {
   Serial.println(F("  | | | . |   |  |  |-   -| | | |  |  |"));
   Serial.println(F("  |_| |___|_|_|_____|_____|_|___|_____|\n"));
   Serial.println(F("TonUINO Version 2.1.mk.1"));
-  Serial.println(F("created by Thorsten VoÃŸ and licensed under GNU/GPL."));
+  Serial.println(F("created by Thorsten Voß and licensed under GNU/GPL."));
   Serial.println(F("Information and contribution at https://tonuino.de.\n"));
   Serial.println(F("Magnus Metal Box\n"));
 
@@ -427,7 +427,7 @@ void setup() {
   // TODOMK: Warnungen beheben: EQ-Modi in Array hinterlegen
   // mp3.setEq(DfMp3_Eq_Normal);
   mp3.setEq(mySettings.eq - 1);
-  // Fix fÃ¼r das Problem mit dem Timeout (ist jetzt in Upstream daher nicht mehr nÃ¶tig!)
+  // Fix für das Problem mit dem Timeout (ist jetzt in Upstream daher nicht mehr nötig!)
   //mySoftwareSerial.setTimeout(10000);
 
   // NFC Leser initialisieren
@@ -446,10 +446,10 @@ void setup() {
   digitalWrite(shutdownPin, LOW);
 
 
-  // RESET --- ALLE DREI KNÃ–PFE BEIM STARTEN GEDRÃœCKT HALTEN -> alle EINSTELLUNGEN werden gelÃ¶scht
+  // RESET --- ALLE DREI KNÖPFE BEIM STARTEN GEDRÜCKT HALTEN -> alle EINSTELLUNGEN werden gelöscht
   if (digitalRead(buttonPause) == LOW && digitalRead(buttonUp) == LOW &&
       digitalRead(buttonDown) == LOW) {
-    Serial.println(F("Reset -> EEPROM wird gelÃ¶scht"));
+    Serial.println(F("Reset -> EEPROM wird gelöscht"));
     for (int i = 0; i < EEPROM.length(); i++) {
       EEPROM.update(i, 0);
     }
@@ -506,9 +506,9 @@ void playFolder() {
   Serial.print(F(" Dateien in Ordner "));
   Serial.println(myFolder->folder);
 
-  // HÃ¶rspielmodus: eine zufÃ¤llige Datei aus dem Ordner
+  // Hörspielmodus: eine zufällige Datei aus dem Ordner
   if (myFolder->mode == 1) {
-    Serial.println(F("HÃ¶rspielmodus -> zufÃ¤lligen Track wiedergeben"));
+    Serial.println(F("Hörspielmodus -> zufälligen Track wiedergeben"));
     currentTrack = random(1, numTracksInFolder + 1);
     Serial.println(currentTrack);
     mp3.playFolderTrack(myFolder->folder, currentTrack);
@@ -519,10 +519,10 @@ void playFolder() {
     currentTrack = 1;
     mp3.playFolderTrack(myFolder->folder, currentTrack);
   }
-  // Party Modus: Ordner in zufÃ¤lliger Reihenfolge
+  // Party Modus: Ordner in zufälliger Reihenfolge
   if (myFolder->mode == 3) {
     Serial.println(
-      F("Party Modus -> Ordner in zufÃ¤lliger Reihenfolge wiedergeben"));
+      F("Party Modus -> Ordner in zufälliger Reihenfolge wiedergeben"));
     shuffleQueue();
     currentTrack = 1;
     mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
@@ -534,9 +534,9 @@ void playFolder() {
     currentTrack = myFolder->special;
     mp3.playFolderTrack(myFolder->folder, currentTrack);
   }
-  // HÃ¶rbuch Modus: kompletten Ordner spielen und Fortschritt merken
+  // Hörbuch Modus: kompletten Ordner spielen und Fortschritt merken
   if (myFolder->mode == 5) {
-    Serial.println(F("HÃ¶rbuch Modus -> kompletten Ordner spielen und "
+    Serial.println(F("Hörbuch Modus -> kompletten Ordner spielen und "
                      "Fortschritt merken"));
     currentTrack = EEPROM.read(myFolder->folder);
     if (currentTrack == 0 || currentTrack > numTracksInFolder) {
@@ -544,9 +544,9 @@ void playFolder() {
     }
     mp3.playFolderTrack(myFolder->folder, currentTrack);
   }
-  // Spezialmodus Von-Bin: HÃ¶rspiel: eine zufÃ¤llige Datei aus dem Ordner
+  // Spezialmodus Von-Bin: Hörspiel: eine zufällige Datei aus dem Ordner
   if (myFolder->mode == 7) {
-    Serial.println(F("Spezialmodus Von-Bin: HÃ¶rspiel -> zufÃ¤lligen Track wiedergeben"));
+    Serial.println(F("Spezialmodus Von-Bin: Hörspiel -> zufälligen Track wiedergeben"));
     Serial.print(myFolder->special);
     Serial.print(F(" bis "));
     Serial.println(myFolder->special2);
@@ -567,10 +567,10 @@ void playFolder() {
     mp3.playFolderTrack(myFolder->folder, currentTrack);
   }
 
-  // Spezialmodus Von-Bis: Party Ordner in zufÃ¤lliger Reihenfolge
+  // Spezialmodus Von-Bis: Party Ordner in zufälliger Reihenfolge
   if (myFolder->mode == 9) {
     Serial.println(
-      F("Spezialmodus Von-Bis: Party -> Ordner in zufÃ¤lliger Reihenfolge wiedergeben"));
+      F("Spezialmodus Von-Bis: Party -> Ordner in zufälliger Reihenfolge wiedergeben"));
     firstTrack = myFolder->special;
     numTracksInFolder = myFolder->special2;
     shuffleQueue();
@@ -585,7 +585,7 @@ void loop() {
     checkStandbyAtMillis();
     mp3.loop();
 
-    // Buttons werden nun Ã¼ber JS_Button gehandelt, dadurch kann jede Taste
+    // Buttons werden nun über JS_Button gehandelt, dadurch kann jede Taste
     // doppelt belegt werden
     readButtons();
 
@@ -621,7 +621,7 @@ void loop() {
         else {
           advertTrack = currentTrack;
         }
-        // Spezialmodus Von-Bis fÃ¼r Album und Party gibt die Dateinummer relativ zur Startposition wieder
+        // Spezialmodus Von-Bis für Album und Party gibt die Dateinummer relativ zur Startposition wieder
         if (myFolder->mode == 8 || myFolder->mode == 9) {
           advertTrack = advertTrack - myFolder->special + 1;
         }
@@ -735,7 +735,7 @@ void adminMenu(bool fromCard) {
   }
   else if (subMenu == 6) {
     // create modifier card
-    // TODO_MK: "Abbrechen"-Ausgabe oder MenÃ¼ sauber ausbauen
+    // TODO_MK: "Abbrechen"-Ausgabe oder Menü sauber ausbauen
     mp3.playMp3FolderTrack(800);
   }
   else if (subMenu == 7) {
@@ -801,7 +801,7 @@ void adminMenu(bool fromCard) {
     }
   }
   else if (subMenu == 11) {
-    Serial.println(F("Reset -> EEPROM wird gelÃ¶scht"));
+    Serial.println(F("Reset -> EEPROM wird gelöscht"));
     for (int i = 0; i < EEPROM.length(); i++) {
       EEPROM.update(i, 0);
     }
@@ -954,7 +954,7 @@ bool setupFolder(folderSettings * theFolder) {
   theFolder->mode = voiceMenu(5, 310, 311, false, 0, 0, true);
   if (theFolder->mode == 0) return false;
 
-  //  // HÃ¶rbuchmodus -> Fortschritt im EEPROM auf 1 setzen
+  //  // Hörbuchmodus -> Fortschritt im EEPROM auf 1 setzen
   //  EEPROM.update(theFolder->folder, 1);
 
   // Einzelmodus -> Datei abfragen
